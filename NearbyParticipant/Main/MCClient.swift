@@ -16,7 +16,7 @@ struct MCClient {
 
     var start: (String, AnyHashable) -> Effect<MCClient.Action, MCClient.Error>
     var connectedPeers: (AnyHashable) -> [MCPeerID]
-    var send: (Data, AnyHashable) -> Void
+    var send: (Data, MCPeerID?, AnyHashable) -> Void
     var stop: (AnyHashable) -> Effect<Never, Never>
 
     enum Action: Equatable {
@@ -83,9 +83,9 @@ extension MCClient {
         connectedPeers: { id in
             return dependencies[id]?.session.connectedPeers ?? []
         },
-        send: { data, id in
+        send: { data, peerId, id in
             guard let session = dependencies[id]?.session else { return }
-            send(data: data, to: session)
+            send(session: session, data: data, to: peerId)
         },
         stop: { id in
             .fireAndForget {
@@ -96,9 +96,9 @@ extension MCClient {
 }
 
 private extension MCClient {
-    static func send(data: Data, to session: MCSession) {
+    static func send(session: MCSession, data: Data, to peerId: MCPeerID?) {
         do {
-            try session.send(data, toPeers: session.connectedPeers, with: .reliable)
+            try session.send(data, toPeers: peerId == nil ? session.connectedPeers : [peerId!], with: .reliable)
         } catch let error {
             print("failed to send data: \(error)")
         }

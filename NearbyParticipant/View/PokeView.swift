@@ -40,6 +40,7 @@ struct PokeView: View {
             }
             Text("\(from.name)さんにPOKEされました")
                 .font(.headline)
+                .foregroundColor(.black)
             Button(action: {
                 poke()
             }, label: {

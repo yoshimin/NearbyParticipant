@@ -110,7 +110,7 @@ let mainReducer = Reducer<MainState, MainAction, MainEnvironment>.combine(
                 return .none
             }
 
-            env.mcClient.send(data, MCId())
+            env.mcClient.send(data, nil, MCId())
             return .none
 
         case let .ni(.success(.onUpdateNearbyObjects(objects))):
@@ -165,7 +165,7 @@ let mainReducer = Reducer<MainState, MainAction, MainEnvironment>.combine(
 
         case let .poke(peer):
             if let message = try? NSKeyedArchiver.archivedData(withRootObject: MCMessage(type: .poke, data: nil), requiringSecureCoding: true) {
-                env.mcClient.send(message, MCId())
+                env.mcClient.send(message, peer.peerId, MCId())
             }
             state.pokedFrom = nil
             return .none
